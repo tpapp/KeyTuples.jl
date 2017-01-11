@@ -11,3 +11,5 @@ Usage:
 ```julia
 k = KeyTuples(:a => 1, :b => 2)
 ```
+
+A similar, and more mature library is [NamedTuples.jl](https://github.com/blackrock/NamedTuples.jl/blob/master/src/NamedTuples.jl).
