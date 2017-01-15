@@ -11,6 +11,10 @@ end
 
 k = KeyTuple(:a => 1, :b => "string")
 
+@testset "constructors" begin
+    @test k == KeyTuple((:a,:b),(1,"string"))
+end
+
 @testset "accessors" begin
     @test keys(k) ≡ (:a,:b)
     @test values(k) == (1,"string")

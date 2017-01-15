@@ -21,6 +21,9 @@ immutable KeyTuple{K,T <: Tuple} <: Associative
     end
 end
 
+KeyTuple{T <: Tuple}(keys::Tuple{Vararg{Symbol}}, values::T) =
+    KeyTuple{keys,T}(values)
+
 function KeyTuple(key_value_pairs::Pair...)
     keys = tuple(map(first, key_value_pairs)...)
     values = tuple(map(last, key_value_pairs)...)
