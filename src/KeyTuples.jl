@@ -1,6 +1,9 @@
 module KeyTuples
 
-export KeyTuple
+import DataFrames: DataFrame
+import NullableArrays: NullableArray
+
+export KeyTuple, keytuples_to_df
 
 """
 Tuple-like type with keys for accessing elements. Valid keys are
@@ -66,5 +69,30 @@ function Base.:(==){Kx,Tx,Ky,Ty}(x::KeyTuple{Kx,Tx}, y::KeyTuple{Ky,Ty})
 end
 
 Base.hash{K,T}(x::KeyTuple{K,T}, h::UInt) = hash(x.values, hash(K, hash(:KeyTuple, h)))
+
+"""
+Internal helper function for conversion to DataFrame. Return a
+`(keys,column)` tuple.
+"""
+function _keytuples_to_df{K,T}(vector::Vector{KeyTuple{K,T}})
+    keys = collect(K)
+    columns = map(index ->
+                  map(x->x.values[index], vector), indices(keys, 1))
+    (keys, columns)
+end
+
+_keytuples_to_df(itr) = _keytuples_to_df(collect(itr))
+
+"""
+Convert an iterable that returns conformable `KeyTuple`s to a
+`DataFrame` with the given columns.
+"""
+function keytuples_to_df(itr)
+    (keys, columns) = _keytuples_to_df(itr)
+    # NOTE currently enforcing that all columns are Nullable
+    # revisit this once https://github.com/JuliaStats/DataFrames.jl/issues/1119
+    # is resolved
+    DataFrame(map(NullableArray, columns), keys)
+end
 
 end # module

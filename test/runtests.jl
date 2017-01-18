@@ -1,5 +1,6 @@
 using KeyTuples
 using Base.Test
+import DataFrames
 
 macro capture_io(io, body)
     quote
@@ -29,7 +30,7 @@ end
     @test k != KeyTuple(:a => 1, :c => "string")
     @test k != KeyTuple(:a => 1, :b => 2)
 end
-    
+
 @testset "show" begin
     string1 = @capture_io io show(io, k)
     string2 = @capture_io io begin
@@ -43,4 +44,11 @@ end
     @test first(k) == (:a => 1)
     @test last(k) == (:b => "string")
     @test collect(k) == [:a => 1, :b => "string"]
+end
+
+@testset "dataframe conversion" begin
+    kts = [KeyTuple(:a => i, :b => string(i)) for i in 1:5]
+    df = keytuples_to_df(kts)
+    df2 = DataFrames.DataFrame(a=collect(1:5), b=string.(1:5))
+    @test isequal(df, df2)
 end
