@@ -71,28 +71,19 @@ end
 Base.hash{K,T}(x::KeyTuple{K,T}, h::UInt) = hash(x.values, hash(K, hash(:KeyTuple, h)))
 
 """
-Internal helper function for conversion to DataFrame. Return a
-`(keys,column)` tuple.
+Internal helper function for conversion to DataFrame. Return a vector
+of `key => column` pairs.
 """
 function _keytuples_to_df{K,T}(vector::Vector{KeyTuple{K,T}})
-    keys = collect(K)
-    columns = map(index ->
-                  map(x->x.values[index], vector), indices(keys, 1))
-    (keys, columns)
+    (Pair(key, map(x->x.values[index], vector)) for (index,key) in enumerate(K))
 end
 
-_keytuples_to_df(itr) = _keytuples_to_df(collect(itr))
+_keytuples_to_df(itr) = _keytuples_to_df(collect(itr)) # FIXME use iterators
 
 """
 Convert an iterable that returns conformable `KeyTuple`s to a
 `DataFrame` with the given columns.
 """
-function keytuples_to_df(itr)
-    (keys, columns) = _keytuples_to_df(itr)
-    # NOTE currently enforcing that all columns are Nullable
-    # revisit this once https://github.com/JuliaStats/DataFrames.jl/issues/1119
-    # is resolved
-    DataFrame(map(NullableArray, columns), keys)
-end
+keytuples_to_df(itr) = DataFrame(; _keytuples_to_df(itr)...)
 
 end # module
